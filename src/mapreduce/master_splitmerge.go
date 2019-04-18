@@ -13,6 +13,7 @@ import (
 // XXX use merge sort
 func (mr *Master) merge() {
 	debug("Merge phase")
+	//println("Merge phase")
 	kvs := make(map[string]string)
 	for i := 0; i < mr.nReduce; i++ {
 		p := mergeName(mr.jobName, i)
