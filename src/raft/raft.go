@@ -42,6 +42,13 @@ type ApplyMsg struct {
 	CommandIndex int
 }
 
+const (
+
+	follower = 0
+	candidate =1
+	leader = 2
+)
+
 //
 // A Go object implementing a single Raft peer.
 //
@@ -50,6 +57,8 @@ type Raft struct {
 	peers     []*labrpc.ClientEnd // RPC end points of all peers
 	persister *Persister          // Object to hold this peer's persisted state
 	me        int                 // this peer's index into peers[]
+	status int                   // 0,1,2
+	votedCount int                // win vote count
 
 	// Your data here (2A, 2B, 2C).
 	// Look at the paper's Figure 2 for a description of what
@@ -64,6 +73,13 @@ func (rf *Raft) GetState() (int, bool) {
 	var term int
 	var isleader bool
 	// Your code here (2A).
+	// term = term +1
+	// rf.status = candidate
+	// println("term = ",term)
+	// args := RequestVoteArgs{}
+	// reply := RequestVoteReply{}
+	// rf.sendRequestVote(term,&args,&reply)
+	isleader = rf.votedCount >= len(rf.peers)
 	return term, isleader
 }
 
@@ -116,6 +132,7 @@ func (rf *Raft) readPersist(data []byte) {
 //
 type RequestVoteArgs struct {
 	// Your data here (2A, 2B).
+	candidateIndex int     
 }
 
 //
@@ -163,6 +180,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 // the struct itself.
 //
 func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
+	println("=======sendRequestVote========")
 	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
 	return ok
 }
@@ -216,12 +234,20 @@ func (rf *Raft) Kill() {
 //
 func Make(peers []*labrpc.ClientEnd, me int,
 	persister *Persister, applyCh chan ApplyMsg) *Raft {
+	println("=======Make==========")
 	rf := &Raft{}
 	rf.peers = peers
 	rf.persister = persister
 	rf.me = me
 
+	rf.status = follower
+	rf.votedCount = 0
+
 	// Your initialization code here (2A, 2B, 2C).
+
+	go func() {
+		// kick off leader election periodically by sending out RequestVote RPCs when it hasn't heard from another peer for a while.
+	}()
 
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
@@ -229,3 +255,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 	return rf
 }
+
+type AppendEntries struct {
+	
+} 

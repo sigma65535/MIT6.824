@@ -75,16 +75,18 @@ func make_config(t *testing.T, n int, unreliable bool) *config {
 	cfg.endnames = make([][]string, cfg.n)
 	cfg.logs = make([]map[int]int, cfg.n)
 	cfg.start = time.Now()
+	println("[78]")
 
 	cfg.setunreliable(unreliable)
 
 	cfg.net.LongDelays(true)
-
+	println("[83]")
 	// create a full set of Rafts.
 	for i := 0; i < cfg.n; i++ {
 		cfg.logs[i] = map[int]int{}
 		cfg.start1(i)
 	}
+	println("[88]")
 
 	// connect everyone
 	for i := 0; i < cfg.n; i++ {
